@@ -75,10 +75,11 @@ const RecAudio = () => {
     if (audioUrl) {
       console.log(URL.createObjectURL(audioUrl)); // 출력된 링크에서 녹음된 오디오 확인 가능
     }
-    const sound = new File([audioUrl], "soundBlob", {
+    const sound = new File([audioUrl], "음성녹음", {
       lastModified: new Date().getTime(),
       type: "audio/wav",
     });
+
     const blobUrl = URL.createObjectURL(sound);
     setTest(blobUrl);
     setSoundFile(sound);
@@ -156,7 +157,10 @@ const RecAudio = () => {
             {onResult ? (
               onDownload ? (
                 <>
-                  <DownloadButton href={`${test}`} download>
+                  <DownloadButton
+                    href={`${test}`}
+                    download={`${soundFile.name}`}
+                  >
                     다운로드
                   </DownloadButton>
                   <BackToRecoding onClick={backToRecoding}>
