@@ -2,13 +2,15 @@ import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { BsFillPlayFill, BsFillPauseFill } from "react-icons/bs";
 
-const RecAudio = () => {
+const PlayAudio = ({ soundFile }) => {
   const audioCtxContainer = useRef(null);
+
   const ref = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [file, setFile] = useState();
   const [playDuration, setPlayDuration] = useState(0);
 
+  //오디오 재생
   const playSound = (buffer, time) => {
     const sourceNode = audioCtxContainer.current.createBufferSource();
     sourceNode.buffer = buffer;
@@ -17,10 +19,13 @@ const RecAudio = () => {
     setIsPlaying(true);
   };
 
+  //파일 업로드
   const onFileChange = (e) => {
-    let file = e.target.files[0];
+    // let file = e.target.files[0];
+    let file = soundFile;
     setFile(file);
-
+    // console.log("FILE:", file);
+    console.log("SOUNDFILE", soundFile);
     let fileReader = new FileReader();
     fileReader.onload = function (ev) {
       audioCtxContainer.current = new AudioContext();
@@ -33,6 +38,7 @@ const RecAudio = () => {
     fileReader.readAsArrayBuffer(file);
   };
 
+  //재생 일시정지 + 시간 데이터
   const onPlayPause = (e) => {
     if (!isPlaying) {
       audioCtxContainer.current.resume();
@@ -69,8 +75,6 @@ const RecAudio = () => {
       }, 1000);
     }
   }, [isPlaying, playDuration]);
-
-  console.log("REAL", realTime);
 
   return (
     <Wrapper>
@@ -194,4 +198,4 @@ const Button = styled.button`
   background: none;
   cursor: pointer;
 `;
-export default RecAudio;
+export default PlayAudio;
