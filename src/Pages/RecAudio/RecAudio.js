@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { BiPlayCircle } from "react-icons/bi";
 import RecodeButton from "../../Components/RecodeButton";
 
+
 const RecAudio = () => {
   const [stream, setStream] = useState();
   const [media, setMedia] = useState();
@@ -79,6 +80,7 @@ const RecAudio = () => {
   console.log(media);
   console.log(audioCtx);
   console.log(audioUrl);
+
   return (
     <Container>
       <LeftSideContainer>
@@ -284,4 +286,4 @@ const Button = styled.button`
   background: none;
   cursor: pointer;
 `;
-export default RecAudio;
+export default PlayAudio;
