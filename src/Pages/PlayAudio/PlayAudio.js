@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import styled from "styled-components";
-import { BsFillPlayFill, BsFillPauseFill, BsStopFill } from "react-icons/bs";
+import { BsFillPlayFill, BsFillPauseFill } from "react-icons/bs";
 
 const RecAudio = () => {
   const audioCtxContainer = useRef(null);
@@ -44,11 +44,7 @@ const RecAudio = () => {
     } else if (audioCtxContainer.current.state === "suspended") {
       audioCtxContainer.current.resume();
     }
-    console.log("CURRENT:", audioCtxContainer.current);
-  };
-
-  const onStop = (e) => {
-    audioCtxContainer.current.suspend();
+    // console.log("CURRENT:", audioCtxContainer.current);
   };
 
   const toHHMMSS = (numSecs) => {
@@ -63,6 +59,15 @@ const RecAudio = () => {
       secNum - hours * 3600 - (minutes * 60).toString().padStart(2, "0");
     return `${hours}:${minutes}:${seconds}`;
   };
+
+  const getRealTime = () => {
+    if (isPlaying) {
+      console.log("DURATION:", playDuration);
+    }
+  };
+
+  getRealTime();
+  setInterval(getRealTime, 1000);
 
   return (
     <Wrapper>
@@ -79,28 +84,19 @@ const RecAudio = () => {
         <Bar>
           <HalfBox></HalfBox>
         </Bar>
-        <Control>
-          <Play>
-            {isPlaying ? (
-              <BsFillPauseFill
-                onClick={onPlayPause}
-                style={{ width: "50px", height: "50px" }}
-              />
-            ) : (
-              <BsFillPlayFill
-                onClick={onPlayPause}
-                style={{ width: "50px", height: "50px" }}
-              />
-            )}
-          </Play>
-
-          <Stop>
-            <BsStopFill
-              onClick={onStop}
+        <Play>
+          {isPlaying ? (
+            <BsFillPauseFill
+              onClick={onPlayPause}
               style={{ width: "50px", height: "50px" }}
             />
-          </Stop>
-        </Control>
+          ) : (
+            <BsFillPlayFill
+              onClick={onPlayPause}
+              style={{ width: "50px", height: "50px" }}
+            />
+          )}
+        </Play>
       </LeftWrapper>
 
       <RightWrapper>
@@ -162,13 +158,10 @@ const HalfBox = styled.div`
   border-bottom: 1px solid #ffc700;
 `;
 
-const Control = styled.div`
+const Play = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
 `;
-
-const Play = styled.div``;
-const Stop = styled.div``;
 
 const List = styled.div`
   border-bottom: 1px solid gray;
