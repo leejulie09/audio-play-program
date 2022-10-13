@@ -1,12 +1,14 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import styled from "styled-components";
-import { BsFillPlayFill, BsStopFill, BsRecordCircle } from "react-icons/bs";
 import { BiPlayCircle } from "react-icons/bi";
 import RecodeButton from "../../Components/RecodeButton";
 
+const async = require("async");
 const BaseAudioContext = new (window.AudioContext ||
   window.webkitAudioContext)();
 const AudioProgress = BaseAudioContext.createScriptProcessor(0, 1, 1);
+const analyser = BaseAudioContext.createAnalyser();
+const distortion = BaseAudioContext.createWaveShaper();
 
 const RecAudio = () => {
   const [stream, setStream] = useState();
@@ -15,8 +17,6 @@ const RecAudio = () => {
   const [source, setSource] = useState();
   const [audioUrl, setAudioUrl] = useState();
   const [audioUrlIntoString, setAudioUrlIntoString] = useState("");
-  const [recodingStart, setRecodingStart] = useState("");
-  const [recodingEnd, setRecodingEnd] = useState("");
 
   function makeSound(stream) {
     const source = BaseAudioContext.createMediaStreamSource(stream);
@@ -25,6 +25,83 @@ const RecAudio = () => {
     AudioProgress.connect(BaseAudioContext.destination);
   }
 
+  const visualize = (stream) => {
+    const source = BaseAudioContext.createMediaStreamSource(stream);
+    source.connect(analyser);
+    analyser.connect(distortion);
+    distortion.connect(BaseAudioContext.destination);
+    const bufferLength = analyser.frequencyBinCount;
+    let dataArray = new Uint8Array(bufferLength);
+    analyser.getByteTimeDomainData(dataArray);
+    console.log(dataArray);
+  };
+  const onRecAudio = (e) => {
+    // 마이크 사용 권한 획득
+    setOnRec(false);
+    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.start();
+      setStream(stream);
+      setMedia(mediaRecorder);
+      makeSound(stream);
+      visualize(stream);
+      mediaRecorder.ondataavailable = function (e) {
+        setAudioUrl(e.data);
+      };
+      console.log(analyser);
+
+      AudioProgress.onaudioprocess = function (e) {
+        if (e.playbackTime > 10) {
+          stream.getAudioTracks().forEach(function (track) {
+            track.stop();
+          });
+          mediaRecorder.stop();
+          AudioProgress.disconnect();
+          BaseAudioContext.createMediaStreamSource(stream).disconnect();
+
+          mediaRecorder.ondataavailable = function (e) {
+            setAudioUrl(e.data);
+            setOnRec(true);
+          };
+        } else {
+          setOnRec(false);
+        }
+      };
+    });
+  };
+
+  const offRecAudio = () => {
+    media.ondataavailable = function (e) {
+      setAudioUrl(e.data);
+      setOnRec(true);
+    };
+
+    // 모든 트랙에서 stop()을 호출해 오디오 스트림을 정지
+    stream.getAudioTracks().forEach(function (track) {
+      track.stop();
+    });
+
+    media.stop();
+    AudioProgress.disconnect();
+    source.disconnect();
+  };
+
+  const onSubmitAudioFile = useCallback(() => {
+    if (audioUrl) {
+      setAudioUrlIntoString(URL.createObjectURL(audioUrl));
+    }
+  }, [audioUrl]);
+
+  const stopMedia = () => {};
+  const RecodeOff = () => {
+    async.waterfall([offRecAudio(), onSubmitAudioFile()], (err, res) => {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("작업완료");
+      }
+    });
+  };
   return (
     <Container>
       <LeftSideContainer>
@@ -32,11 +109,17 @@ const RecAudio = () => {
           <RecodeTimeBox>00:00:00</RecodeTimeBox>
         </LeftTopWrapper>
         <LeftMiddleWrapper>
-          <AudioWaveUIBox>AUDIO WAVE IU</AudioWaveUIBox>
+          <AudioWaveUIBox></AudioWaveUIBox>
         </LeftMiddleWrapper>
         <LeftBottomWrapper>
           <AudioControllerBox>
-            <RecodeButton />
+            <RecodeButton
+              onClickRecodButton={onRec ? onRecAudio : offRecAudio}
+              recodingValue={onRec}
+            />
+            <audio src={audioUrlIntoString} controls></audio>
+            <button onClick={onSubmitAudioFile}>결과 확인</button>
+            <button>일시정지</button>
           </AudioControllerBox>
         </LeftBottomWrapper>
         {/* <Bar>
@@ -82,6 +165,7 @@ const Container = styled.div`
   display: flex;
   width: 100vw;
   height: 100vh;
+  background-color: #363636;
 `;
 const LeftSideContainer = styled.div`
   display: flex;
@@ -111,6 +195,7 @@ const LeftMiddleWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 0% 2%;
   width: 100%;
   height: 45%;
 `;
@@ -120,8 +205,8 @@ const AudioWaveUIBox = styled.div`
   align-items: center;
   width: 100%;
   height: 80%;
-  background-color: rgba(22, 54, 196, 0.5);
-  border: 1px solid black;
+  background-color: #575757;
+  border-radius: 5rem;
 `;
 const LeftBottomWrapper = styled.div`
   display: flex;

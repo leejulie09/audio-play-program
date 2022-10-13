@@ -1,4 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+const async = require("async");
+
 const BaseAudioContext = new (window.AudioContext ||
   window.webkitAudioContext)();
 const AudioProgress = BaseAudioContext.createScriptProcessor(0, 1, 1);
@@ -87,21 +89,15 @@ const Audio = () => {
 
   const offRecAudio = () => {
     media.ondataavailable = function (e) {
-      console.log(e);
-      console.log(e.data);
-      console.log(URL.createObjectURL(e.data));
       setAudioUrl(e.data);
       setOnRec(true);
     };
-
     // 모든 트랙에서 stop()을 호출해 오디오 스트림을 정지
     stream.getAudioTracks().forEach(function (track) {
       track.stop();
     });
-
     // 미디어 캡처 중지
     media.stop();
-
     // 메서드가 호출 된 노드 연결 해제
     AudioProgress.disconnect();
     source.disconnect();
@@ -117,11 +113,13 @@ const Audio = () => {
     });
     console.log(sound);
   }, [audioUrl]);
-
   return (
     <>
-      <button onClick={onRec ? onRecAudio : offRecAudio}>녹음</button>
-      <button onClick={onSubmitAudioFile}>결과 확인</button>
+      {onRec ? (
+        <button onClick={onRec ? onRecAudio : offRecAudio}>녹음</button>
+      ) : (
+        <button onClick={onSubmitAudioFile}>결과 확인</button>
+      )}
       <audio ref={audioElement} src={audioUrlIntoString} controls></audio>
     </>
   );
