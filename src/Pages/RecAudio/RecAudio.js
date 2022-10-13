@@ -3,7 +3,6 @@ import styled from "styled-components";
 import { BiPlayCircle } from "react-icons/bi";
 import RecodeButton from "../../Components/RecodeButton";
 
-
 const RecAudio = () => {
   const [stream, setStream] = useState();
   const [media, setMedia] = useState();
@@ -12,6 +11,7 @@ const RecAudio = () => {
   const [source, setSource] = useState();
   const [analyser, setAnalyser] = useState();
   const [audioUrl, setAudioUrl] = useState();
+  const [test, setTest] = useState("");
 
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -28,6 +28,7 @@ const RecAudio = () => {
 
     navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
       const mediaRecorder = new MediaRecorder(stream);
+      console.log(audioUrl);
 
       mediaRecorder.start();
       mediaRecorder.onstart = () => {
@@ -61,6 +62,13 @@ const RecAudio = () => {
     if (audioUrl) {
       console.log(URL.createObjectURL(audioUrl)); // 출력된 링크에서 녹음된 오디오 확인 가능
     }
+    const sound = new File([audioUrl], "soundBlob", {
+      lastModified: new Date().getTime(),
+      type: "audio/wav",
+    });
+    const blobUrl = URL.createObjectURL(sound);
+    setTest(blobUrl);
+    console.log(blobUrl);
   }, [audioUrl]);
 
   const pauseFucntion = () => {
@@ -77,9 +85,9 @@ const RecAudio = () => {
       console.log("이어서 녹화시작");
     };
   };
-  console.log(media);
-  console.log(audioCtx);
-  console.log(audioUrl);
+  // console.log(media);
+  // console.log(audioCtx);
+  // console.log(audioUrl);
 
   return (
     <Container>
@@ -125,7 +133,7 @@ const RecAudio = () => {
 
       <RightWrapper>
         <List>
-          <File>
+          <Files>
             <FilePlay>
               <BiPlayCircle style={{ width: "35px", height: "35px" }} />
             </FilePlay>
@@ -133,10 +141,11 @@ const RecAudio = () => {
               <FileName>음성파일 01</FileName>
               <FileDetail>2020년 10월 12일 00:00:10 </FileDetail>
             </FileInfo>
-          </File>
+          </Files>
           <DropDown>
-            <Button>다운로드</Button>
-            <Button>삭제</Button>
+            <DownloadButton href={`${test}`} download>
+              다운로드
+            </DownloadButton>
           </DropDown>
         </List>
       </RightWrapper>
@@ -252,7 +261,7 @@ const List = styled.div`
   padding-bottom: 10px;
   margin: 0 10px;
 `;
-const File = styled.div`
+const Files = styled.div`
   margin: 0 10px;
   margin: 5px;
   display: flex;
@@ -281,9 +290,9 @@ const DropDown = styled.div`
   padding: 0 40px;
 `;
 
-const Button = styled.button`
+const DownloadButton = styled.a`
   border: 0;
   background: none;
   cursor: pointer;
 `;
-export default PlayAudio;
+export default RecAudio;
