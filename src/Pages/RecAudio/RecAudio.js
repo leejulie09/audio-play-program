@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { BiPlayCircle } from "react-icons/bi";
 import RecodeButton from "../../Components/RecodeButton";
+import PlayAudio from "../PlayAudio/PlayAudio";
 
 const RecAudio = () => {
   const [stream, setStream] = useState();
@@ -58,6 +59,8 @@ const RecAudio = () => {
     source.disconnect();
   };
 
+  const [soundFile, setSoundFile] = useState();
+
   const onSubmitAudioFile = useCallback(() => {
     if (audioUrl) {
       console.log(URL.createObjectURL(audioUrl)); // 출력된 링크에서 녹음된 오디오 확인 가능
@@ -68,9 +71,11 @@ const RecAudio = () => {
     });
     const blobUrl = URL.createObjectURL(sound);
     setTest(blobUrl);
-    console.log(blobUrl);
+    setSoundFile(sound);
+    // console.log(blobUrl);
   }, [audioUrl]);
 
+  console.log("SOUNDFILE:", soundFile);
   const pauseFucntion = () => {
     setOnPause(false);
     media.pause();
@@ -91,6 +96,7 @@ const RecAudio = () => {
 
   return (
     <Container>
+      <PlayAudio soundFile={soundFile} />
       <LeftSideContainer>
         <LeftTopWrapper>
           <RecodeTimeBox>00:00:00</RecodeTimeBox>
