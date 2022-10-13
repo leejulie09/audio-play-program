@@ -7,6 +7,7 @@ import {
   // BsRecordCircle,
 } from "react-icons/bs";
 import { BiPlayCircle } from "react-icons/bi";
+import moment from "moment/moment";
 
 const RecAudio = () => {
   const audioCtxContainer = useRef(null);
@@ -14,6 +15,11 @@ const RecAudio = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [file, setFile] = useState();
   const [playDuration, setPlayDuration] = useState(0);
+  const [test, setTest] = useState("");
+  const [playList, setPlayList] = useState({
+    name: "",
+  });
+  const [blobList, setBlobList] = useState({});
 
   const playSound = (buffer, time) => {
     const sourceNode = audioCtxContainer.current.createBufferSource();
@@ -26,6 +32,12 @@ const RecAudio = () => {
   const onFileChange = (e) => {
     let file = e.target.files[0];
     console.log(file);
+    const downloadBlob = new Blob([file], { type: "audio/wav" });
+    const blobUrl = URL.createObjectURL(downloadBlob);
+
+    // setPlayList({ ...playList, name: file.concat(blobUrl) });
+
+    setTest(blobUrl);
     setFile(file);
 
     let fileReader = new FileReader();
@@ -100,6 +112,7 @@ const RecAudio = () => {
             accept=".mp3,.wav"
             ref={ref}
             onChange={onFileChange}
+            multiple
           />
         </OpenFile>
         <Time>{toHHMMSS(playDuration)}</Time>
@@ -131,21 +144,27 @@ const RecAudio = () => {
       </LeftWrapper>
 
       <RightWrapper>
-        <List>
-          <File>
-            <FilePlay>
-              <BiPlayCircle style={{ width: "35px", height: "35px" }} />
-            </FilePlay>
-            <FileInfo>
-              <FileName>음성파일 01</FileName>
-              <FileDetail>2020년 10월 12일 00:00:10 </FileDetail>
-            </FileInfo>
-          </File>
-          <DropDown>
-            <Button>다운로드</Button>
-            <Button>삭제</Button>
-          </DropDown>
-        </List>
+        {file && (
+          <List>
+            <File>
+              <FilePlay>
+                <BiPlayCircle style={{ width: "35px", height: "35px" }} />
+              </FilePlay>
+              <FileInfo>
+                <FileName>{file.name}</FileName>
+                <FileDetail>
+                  {moment(file.lastModifiedDate).format("YYYY-MM-DD-hh:mm:ss")}
+                </FileDetail>
+              </FileInfo>
+            </File>
+            <DropDown>
+              <DownloadButton href={`${test}`} download={`${file.name}`}>
+                다운로드
+              </DownloadButton>
+              <DeleteButton>삭제</DeleteButton>
+            </DropDown>
+          </List>
+        )}
       </RightWrapper>
     </Wrapper>
   );
@@ -231,7 +250,14 @@ const DropDown = styled.div`
   padding: 0 40px;
 `;
 
-const Button = styled.button`
+const DownloadButton = styled.a`
+  border: 0;
+  background: none;
+  text-decoration: none;
+  cursor: pointer;
+`;
+
+const DeleteButton = styled.button`
   border: 0;
   background: none;
   cursor: pointer;
