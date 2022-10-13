@@ -2,13 +2,19 @@ import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { BsFillPlayFill, BsFillPauseFill } from "react-icons/bs";
 
-const PlayAudio = ({ soundFile }) => {
-  const audioCtxContainer = useRef(null);
+const blobs = new Blob();
+const files = new File([blobs], "soundBlob", {
+  lastModified: new Date().getTime(),
+  type: "audio/wav",
+});
 
+const PlayAudio = ({ soundFile, backToRecode }) => {
+  const audioCtxContainer = useRef(null);
   const ref = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [file, setFile] = useState();
+  const [file, setFile] = useState(files);
   const [playDuration, setPlayDuration] = useState(0);
+  const fileReader = new FileReader();
 
   //오디오 재생
   const playSound = (buffer, time) => {
@@ -18,15 +24,11 @@ const PlayAudio = ({ soundFile }) => {
     sourceNode.start(time);
     setIsPlaying(true);
   };
+  useEffect(() => {
+    setFile(soundFile);
+  }, [soundFile]);
 
-  //파일 업로드
-  const onFileChange = (e) => {
-    // let file = e.target.files[0];
-    let file = soundFile;
-    setFile(file);
-    // console.log("FILE:", file);
-    console.log("SOUNDFILE", soundFile);
-    let fileReader = new FileReader();
+  useEffect(() => {
     fileReader.onload = function (ev) {
       audioCtxContainer.current = new AudioContext();
       audioCtxContainer.current
@@ -36,7 +38,25 @@ const PlayAudio = ({ soundFile }) => {
         });
     };
     fileReader.readAsArrayBuffer(file);
-  };
+  }, [file]);
+  // 파일 업로드
+  // const onFileChange = (e) => {
+  //   console.log(e.target.files);
+  //   let file = e.target.files[0];
+  //   setFile(file);
+  //   // console.log("FILE:", file);
+  //   console.log("SOUNDFILE", soundFile);
+  //   let fileReader = new FileReader();
+  //   fileReader.onload = function (ev) {
+  //     audioCtxContainer.current = new AudioContext();
+  //     audioCtxContainer.current
+  //       .decodeAudioData(ev.target.result)
+  //       .then(function (buffer) {
+  //         playSound(buffer);
+  //       });
+  //   };
+  //   fileReader.readAsArrayBuffer(file);
+  // };
 
   //재생 일시정지 + 시간 데이터
   const onPlayPause = (e) => {
@@ -77,125 +97,104 @@ const PlayAudio = ({ soundFile }) => {
   }, [isPlaying, playDuration]);
 
   return (
-    <Wrapper>
-      <LeftWrapper>
+    <Container>
+      <Wrapper>
         <OpenFile>
-          <input
+          {/* <input
             type="file"
             accept=".mp3,.wav"
             ref={ref}
             onChange={onFileChange}
-          />
+          /> */}
         </OpenFile>
 
-        <Play>
-          {isPlaying ? (
-            <BsFillPauseFill
-              onClick={onPlayPause}
-              style={{ width: "50px", height: "50px" }}
-            />
-          ) : (
-            <BsFillPlayFill
-              onClick={onPlayPause}
-              style={{ width: "50px", height: "50px" }}
-            />
-          )}
-        </Play>
-        <Time>
-          {realTime}
-          {/* {toHHMMSS(playDuration)} */}
-        </Time>
-      </LeftWrapper>
-
-      <RightWrapper>
-        <List>
-          <File>
-            <FileInfo>
-              <FileName>
-                음성파일 01
-                {/* {file.name} */}
-              </FileName>
-              <FileDetail>
-                2022년 10월 13일
-                {/* {file.lastModifiedDate} */}
-              </FileDetail>
-            </FileInfo>
-          </File>
-          <DropDown>
-            <Button>다운로드</Button>
-            <Button>삭제</Button>
-          </DropDown>
-        </List>
-      </RightWrapper>
-    </Wrapper>
+        <TimeBox>
+          <Time>
+            {realTime}
+            {/* {toHHMMSS(playDuration)} */}
+          </Time>
+        </TimeBox>
+        <PlayBox>
+          <Play>
+            {isPlaying ? (
+              <BsFillPauseFill
+                onClick={onPlayPause}
+                style={{ width: "50px", height: "50px" }}
+              />
+            ) : (
+              <BsFillPlayFill
+                onClick={onPlayPause}
+                style={{ width: "50px", height: "50px" }}
+              />
+            )}
+          </Play>
+        </PlayBox>
+      </Wrapper>
+    </Container>
   );
 };
 
-const Wrapper = styled.div`
+const Container = styled.div`
   display: flex;
-  font-family: "Noto Sans KR";
-  margin: 50px 200px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
 `;
 
-const LeftWrapper = styled.div`
-  width: 465px;
-  height: 423px;
-  padding: 40px;
-  border-right: 1px solid gray;
+const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 30rem;
+  height: 15rem;
 `;
 
 const OpenFile = styled.div``;
 
-const RightWrapper = styled.div`
-  width: 268px;
-  height: 423px;
-`;
-
-const Time = styled.p`
+const TimeBox = styled.p`
   display: flex;
   justify-content: center;
+  align-items: center;
+  width: 25rem;
+  height: 10rem;
+`;
+const Time = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
   font-size: 5rem;
-  margin: 10px 0;
+  color: white;
+  border-radius: 3rem;
+  transition: 0.3s all;
 `;
 
+const PlayBox = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 25rem;
+  height: 5rem;
+`;
 const Play = styled.div`
   display: flex;
   justify-content: center;
-  margin: 10px 0;
+  align-items: center;
+  width: 4rem;
+  height: 4rem;
+  color: #9e9e9e;
+  border-radius: 3rem;
+  background-color: rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  transition: 0.3s all;
+  :hover {
+    cursor: pointer;
+    transform: scale(1.05);
+    color: white;
+  }
 `;
 
-const List = styled.div`
-  border-bottom: 1px solid gray;
-  padding-bottom: 10px;
-  margin: 0 10px;
-`;
-const File = styled.div`
-  margin: 10px;
-`;
-
-const FileInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 0 20px 10px;
-`;
-const FileName = styled.p`
-  font-size: 1rem;
-  margin-bottom: 0.2rem;
-`;
-const FileDetail = styled.p`
-  font-size: 0.7rem;
-  color: gray;
-`;
-const DropDown = styled.div`
-  display: flex;
-  justify-content: space-between;
-  padding: 0 40px;
-`;
-
-const Button = styled.button`
-  border: 0;
-  background: none;
-  cursor: pointer;
-`;
 export default PlayAudio;
