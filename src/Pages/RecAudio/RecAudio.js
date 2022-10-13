@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { BsFillPlayFill, BsStopFill, BsRecordCircle } from "react-icons/bs";
 import { BiPlayCircle } from "react-icons/bi";
 
-const RecAudio = () => {
+const PlayAudio = () => {
   return (
     <Wrapper>
       <LeftWrapper>
@@ -128,4 +128,4 @@ const Button = styled.button`
   background: none;
   cursor: pointer;
 `;
-export default RecAudio;
+export default PlayAudio;
