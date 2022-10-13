@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { BsFillPlayFill, BsFillPauseFill } from "react-icons/bs";
 
@@ -44,7 +44,6 @@ const RecAudio = () => {
     } else if (audioCtxContainer.current.state === "suspended") {
       audioCtxContainer.current.resume();
     }
-    // console.log("CURRENT:", audioCtxContainer.current);
   };
 
   const toHHMMSS = (numSecs) => {
@@ -55,19 +54,23 @@ const RecAudio = () => {
     let minutes = Math.floor((secNum - hours * 3600) / 60)
       .toString()
       .padStart(2, "0");
-    let seconds =
-      secNum - hours * 3600 - (minutes * 60).toString().padStart(2, "0");
+    let seconds = (secNum - hours * 3600 - minutes * 60)
+      .toString()
+      .padStart(2, "0");
     return `${hours}:${minutes}:${seconds}`;
   };
 
-  const getRealTime = () => {
-    if (isPlaying) {
-      console.log("DURATION:", playDuration);
-    }
-  };
+  const [realTime, setRealTime] = useState("00:00:00");
 
-  getRealTime();
-  setInterval(getRealTime, 1000);
+  useEffect(() => {
+    if (isPlaying) {
+      setInterval(() => {
+        setRealTime(toHHMMSS(audioCtxContainer.current.currentTime));
+      }, 1000);
+    }
+  }, [isPlaying, playDuration]);
+
+  console.log("REAL", realTime);
 
   return (
     <Wrapper>
@@ -80,10 +83,7 @@ const RecAudio = () => {
             onChange={onFileChange}
           />
         </OpenFile>
-        <Time>{toHHMMSS(playDuration)}</Time>
-        <Bar>
-          <HalfBox></HalfBox>
-        </Bar>
+
         <Play>
           {isPlaying ? (
             <BsFillPauseFill
@@ -97,6 +97,10 @@ const RecAudio = () => {
             />
           )}
         </Play>
+        <Time>
+          {realTime}
+          {/* {toHHMMSS(playDuration)} */}
+        </Time>
       </LeftWrapper>
 
       <RightWrapper>
@@ -147,20 +151,13 @@ const Time = styled.p`
   display: flex;
   justify-content: center;
   font-size: 5rem;
-`;
-const Bar = styled.div`
-  height: 173px;
-  margin: 20px 5px;
-`;
-
-const HalfBox = styled.div`
-  height: 50%;
-  border-bottom: 1px solid #ffc700;
+  margin: 10px 0;
 `;
 
 const Play = styled.div`
   display: flex;
   justify-content: center;
+  margin: 10px 0;
 `;
 
 const List = styled.div`
