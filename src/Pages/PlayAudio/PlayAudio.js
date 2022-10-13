@@ -25,7 +25,9 @@ const RecAudio = () => {
 
   const onFileChange = (e) => {
     let file = e.target.files[0];
-    console.log(file);
+    console.log("FILE:", file);
+    console.log("NAME:", file.name);
+    console.log("DATE:", file.lastModifiedDate);
     setFile(file);
 
     let fileReader = new FileReader();
@@ -41,12 +43,11 @@ const RecAudio = () => {
   };
 
   const onPlayPause = (e) => {
-    console.log("audioState", audioCtxContainer.current.state);
-    console.log("duration", audioCtxContainer.current.currentTime);
+    // console.log("audioState", audioCtxContainer.current.state);
+    // console.log("duration", audioCtxContainer.current.currentTime);
     if (!isPlaying) {
       audioCtxContainer.current.resume();
       setIsPlaying(true);
-      document.getElementById("pauseButton").innerHTML = "Pause";
     } else if (audioCtxContainer.current.state === "running") {
       setPlayDuration(audioCtxContainer.current.currentTime);
       audioCtxContainer.current.suspend();
@@ -54,6 +55,10 @@ const RecAudio = () => {
     } else if (audioCtxContainer.current.state === "suspended") {
       audioCtxContainer.current.resume();
     }
+  };
+
+  const onStop = (e) => {
+    audioCtxContainer.current.suspend();
   };
 
   const toHHMMSS = (numSecs) => {
@@ -108,16 +113,17 @@ const RecAudio = () => {
         </Bar>
         <Control>
           <Play>
-            <BsFillPlayFill
-              onClick={onPlayPause}
-              style={{ width: "50px", height: "50px" }}
-              isPlaying={false}
-            />
-            <BsFillPauseFill
-              onClick={onPlayPause}
-              style={{ width: "50px", height: "50px" }}
-              isPlaying={true}
-            />
+            {isPlaying ? (
+              <BsFillPauseFill
+                onClick={onPlayPause}
+                style={{ width: "50px", height: "50px" }}
+              />
+            ) : (
+              <BsFillPlayFill
+                onClick={onPlayPause}
+                style={{ width: "50px", height: "50px" }}
+              />
+            )}
           </Play>
           {/* <Record>
             <BsRecordCircle
@@ -125,7 +131,10 @@ const RecAudio = () => {
             />
           </Record> */}
           <Stop>
-            <BsStopFill style={{ width: "50px", height: "50px" }} />
+            <BsStopFill
+              onClick={onStop}
+              style={{ width: "50px", height: "50px" }}
+            />
           </Stop>
         </Control>
       </LeftWrapper>
@@ -137,8 +146,14 @@ const RecAudio = () => {
               <BiPlayCircle style={{ width: "35px", height: "35px" }} />
             </FilePlay>
             <FileInfo>
-              <FileName>음성파일 01</FileName>
-              <FileDetail>2020년 10월 12일 00:00:10 </FileDetail>
+              <FileName>
+                음성파일01
+                {/* {file.name} */}
+              </FileName>
+              <FileDetail>
+                2022년 10월 13일
+                {/* {file.lastModifiedDate} */}
+              </FileDetail>
             </FileInfo>
           </File>
           <DropDown>
@@ -165,7 +180,7 @@ const LeftWrapper = styled.div`
 `;
 
 const OpenFile = styled.div`
-  background-color: yellow;
+  border: 5px solid blue;
 `;
 
 const RightWrapper = styled.div`
