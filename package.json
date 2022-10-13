@@ -12,6 +12,7 @@
     "react-icons": "^4.4.0",
     "react-router-dom": "^6.4.2",
     "react-scripts": "5.0.1",
+    "react-wavesurfer.js": "^0.0.8",
     "styled-components": "^5.3.6",
     "styled-reset": "^4.4.2",
     "wavesurfer.js": "^6.3.0",

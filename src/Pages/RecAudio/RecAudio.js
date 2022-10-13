@@ -1,72 +1,42 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { BiPlayCircle } from "react-icons/bi";
 import RecodeButton from "../../Components/RecodeButton";
-
-const async = require("async");
-const BaseAudioContext = new (window.AudioContext ||
-  window.webkitAudioContext)();
-const AudioProgress = BaseAudioContext.createScriptProcessor(0, 1, 1);
-const analyser = BaseAudioContext.createAnalyser();
-const distortion = BaseAudioContext.createWaveShaper();
 
 const RecAudio = () => {
   const [stream, setStream] = useState();
   const [media, setMedia] = useState();
   const [onRec, setOnRec] = useState(true);
+  const [onPause, setOnPause] = useState(true);
   const [source, setSource] = useState();
+  const [analyser, setAnalyser] = useState();
   const [audioUrl, setAudioUrl] = useState();
-  const [audioUrlIntoString, setAudioUrlIntoString] = useState("");
 
-  function makeSound(stream) {
-    const source = BaseAudioContext.createMediaStreamSource(stream);
-    setSource(source);
-    source.connect(AudioProgress);
-    AudioProgress.connect(BaseAudioContext.destination);
-  }
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-  const visualize = (stream) => {
-    const source = BaseAudioContext.createMediaStreamSource(stream);
-    source.connect(analyser);
-    analyser.connect(distortion);
-    distortion.connect(BaseAudioContext.destination);
-    const bufferLength = analyser.frequencyBinCount;
-    let dataArray = new Uint8Array(bufferLength);
-    analyser.getByteTimeDomainData(dataArray);
-    console.log(dataArray);
-  };
-  const onRecAudio = (e) => {
-    // 마이크 사용 권한 획득
-    setOnRec(false);
+  const onRecAudio = () => {
+    const analyser = audioCtx.createScriptProcessor(0, 1, 1);
+    setAnalyser(analyser);
+
+    function makeSound(stream) {
+      const source = audioCtx.createMediaStreamSource(stream);
+      setSource(source);
+      source.connect(analyser);
+      analyser.connect(audioCtx.destination);
+    }
+
     navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
       const mediaRecorder = new MediaRecorder(stream);
+
       mediaRecorder.start();
+      mediaRecorder.onstart = () => {
+        console.log("녹화 시작");
+      };
+
       setStream(stream);
       setMedia(mediaRecorder);
       makeSound(stream);
-      visualize(stream);
-      mediaRecorder.ondataavailable = function (e) {
-        setAudioUrl(e.data);
-      };
-      console.log(analyser);
-
-      AudioProgress.onaudioprocess = function (e) {
-        if (e.playbackTime > 10) {
-          stream.getAudioTracks().forEach(function (track) {
-            track.stop();
-          });
-          mediaRecorder.stop();
-          AudioProgress.disconnect();
-          BaseAudioContext.createMediaStreamSource(stream).disconnect();
-
-          mediaRecorder.ondataavailable = function (e) {
-            setAudioUrl(e.data);
-            setOnRec(true);
-          };
-        } else {
-          setOnRec(false);
-        }
-      };
+      setOnRec(false);
     });
   };
 
@@ -75,33 +45,40 @@ const RecAudio = () => {
       setAudioUrl(e.data);
       setOnRec(true);
     };
-
-    // 모든 트랙에서 stop()을 호출해 오디오 스트림을 정지
     stream.getAudioTracks().forEach(function (track) {
       track.stop();
     });
-
     media.stop();
-    AudioProgress.disconnect();
+    media.onstop = () => {
+      console.log("녹화중지");
+    };
+    analyser.disconnect();
     source.disconnect();
   };
 
   const onSubmitAudioFile = useCallback(() => {
     if (audioUrl) {
-      setAudioUrlIntoString(URL.createObjectURL(audioUrl));
+      console.log(URL.createObjectURL(audioUrl)); // 출력된 링크에서 녹음된 오디오 확인 가능
     }
   }, [audioUrl]);
 
-  const stopMedia = () => {};
-  const RecodeOff = () => {
-    async.waterfall([offRecAudio(), onSubmitAudioFile()], (err, res) => {
-      if (err) {
-        console.log(err);
-      } else {
-        console.log("작업완료");
-      }
-    });
+  const pauseFucntion = () => {
+    setOnPause(false);
+    media.pause();
+    media.onpause = () => {
+      console.log("일시정지");
+    };
   };
+  const resumeFucntion = () => {
+    setOnPause(true);
+    media.resume();
+    media.onresume = () => {
+      console.log("이어서 녹화시작");
+    };
+  };
+  console.log(media);
+  console.log(audioCtx);
+  console.log(audioUrl);
   return (
     <Container>
       <LeftSideContainer>
@@ -109,17 +86,21 @@ const RecAudio = () => {
           <RecodeTimeBox>00:00:00</RecodeTimeBox>
         </LeftTopWrapper>
         <LeftMiddleWrapper>
-          <AudioWaveUIBox></AudioWaveUIBox>
+          <AudioWaveUIBox>
+            <Emoji>🎤</Emoji>
+            <PleaseClickMessage>Click the Red Button below!</PleaseClickMessage>
+          </AudioWaveUIBox>
         </LeftMiddleWrapper>
         <LeftBottomWrapper>
           <AudioControllerBox>
             <RecodeButton
               onClickRecodButton={onRec ? onRecAudio : offRecAudio}
-              recodingValue={onRec}
-            />
-            <audio src={audioUrlIntoString} controls></audio>
+              onClickPauseButton={onPause ? pauseFucntion : resumeFucntion}
+              recValue={onRec}
+            >
+              녹음
+            </RecodeButton>
             <button onClick={onSubmitAudioFile}>결과 확인</button>
-            <button>일시정지</button>
           </AudioControllerBox>
         </LeftBottomWrapper>
         {/* <Bar>
@@ -160,7 +141,23 @@ const RecAudio = () => {
     </Container>
   );
 };
-
+const PleaseClickMessage = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: auto;
+  height: 3rem;
+  color: white;
+  font-size: 1.5rem;
+`;
+const Emoji = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: auto;
+  height: 10rem;
+  font-size: 8rem;
+`;
 const Container = styled.div`
   display: flex;
   width: 100vw;
@@ -201,12 +198,14 @@ const LeftMiddleWrapper = styled.div`
 `;
 const AudioWaveUIBox = styled.div`
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 100%;
   height: 80%;
   background-color: #575757;
   border-radius: 5rem;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
 `;
 const LeftBottomWrapper = styled.div`
   display: flex;
@@ -221,10 +220,7 @@ const AudioControllerBox = styled.div`
   align-items: center;
   width: 40%;
   height: 40%;
-  background-color: rgba(66, 245, 87, 0.5);
-  border: 1px solid black;
 `;
-
 const RightWrapper = styled.div`
   width: 268px;
   height: 423px;
