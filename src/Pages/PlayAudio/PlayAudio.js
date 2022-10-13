@@ -253,7 +253,7 @@ const DropDown = styled.div`
 const DownloadButton = styled.a`
   border: 0;
   background: none;
-  text-decoration: none;
+  text-decoration: none +;
   cursor: pointer;
 `;
 
