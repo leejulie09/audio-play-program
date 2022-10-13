@@ -1,12 +1,6 @@
 import React, { useRef, useState } from "react";
 import styled from "styled-components";
-import {
-  BsFillPlayFill,
-  BsFillPauseFill,
-  BsStopFill,
-  // BsRecordCircle,
-} from "react-icons/bs";
-import { BiPlayCircle } from "react-icons/bi";
+import { BsFillPlayFill, BsFillPauseFill, BsStopFill } from "react-icons/bs";
 
 const RecAudio = () => {
   const audioCtxContainer = useRef(null);
@@ -25,7 +19,6 @@ const RecAudio = () => {
 
   const onFileChange = (e) => {
     let file = e.target.files[0];
-    console.log(file);
     setFile(file);
 
     let fileReader = new FileReader();
@@ -41,12 +34,9 @@ const RecAudio = () => {
   };
 
   const onPlayPause = (e) => {
-    console.log("audioState", audioCtxContainer.current.state);
-    console.log("duration", audioCtxContainer.current.currentTime);
     if (!isPlaying) {
       audioCtxContainer.current.resume();
       setIsPlaying(true);
-      document.getElementById("pauseButton").innerHTML = "Pause";
     } else if (audioCtxContainer.current.state === "running") {
       setPlayDuration(audioCtxContainer.current.currentTime);
       audioCtxContainer.current.suspend();
@@ -54,6 +44,11 @@ const RecAudio = () => {
     } else if (audioCtxContainer.current.state === "suspended") {
       audioCtxContainer.current.resume();
     }
+    console.log("CURRENT:", audioCtxContainer.current);
+  };
+
+  const onStop = (e) => {
+    audioCtxContainer.current.suspend();
   };
 
   const toHHMMSS = (numSecs) => {
@@ -69,31 +64,9 @@ const RecAudio = () => {
     return `${hours}:${minutes}:${seconds}`;
   };
 
-  //wav다운로드
-  // document.getElementById("export").addEventListener("click", function () {
-  //   // export original recording
-  //   module.recorder.exportWAV(function (blob) {
-  //     var url = URL.createObjectURL(blob),
-  //       li = document.createElement("li"),
-  //       au = document.createElement("audio"),
-  //       hf = document.createElement("a");
-
-  //     au.controls = true;
-  //     au.src = url;
-  //     hf.href = url;
-  //     hf.download =
-  //       new Date().toISOString().replace("T", "-").slice(0, -5) + ".wav";
-  //     hf.innerHTML = hf.download;
-  //     li.appendChild(au);
-  //     li.appendChild(hf);
-  //     document.getElementById("downloads").appendChild(li);
-  //   });
-  // });
-
   return (
     <Wrapper>
       <LeftWrapper>
-        {/* <audio src={file} controls></audio>; */}
         <OpenFile>
           <input
             type="file"
@@ -108,24 +81,24 @@ const RecAudio = () => {
         </Bar>
         <Control>
           <Play>
-            <BsFillPlayFill
-              onClick={onPlayPause}
-              style={{ width: "50px", height: "50px" }}
-              isPlaying={false}
-            />
-            <BsFillPauseFill
-              onClick={onPlayPause}
-              style={{ width: "50px", height: "50px" }}
-              isPlaying={true}
-            />
+            {isPlaying ? (
+              <BsFillPauseFill
+                onClick={onPlayPause}
+                style={{ width: "50px", height: "50px" }}
+              />
+            ) : (
+              <BsFillPlayFill
+                onClick={onPlayPause}
+                style={{ width: "50px", height: "50px" }}
+              />
+            )}
           </Play>
-          {/* <Record>
-            <BsRecordCircle
-              style={{ width: "50px", height: "50px", color: "red" }}
-            />
-          </Record> */}
+
           <Stop>
-            <BsStopFill style={{ width: "50px", height: "50px" }} />
+            <BsStopFill
+              onClick={onStop}
+              style={{ width: "50px", height: "50px" }}
+            />
           </Stop>
         </Control>
       </LeftWrapper>
@@ -133,12 +106,15 @@ const RecAudio = () => {
       <RightWrapper>
         <List>
           <File>
-            <FilePlay>
-              <BiPlayCircle style={{ width: "35px", height: "35px" }} />
-            </FilePlay>
             <FileInfo>
-              <FileName>음성파일 01</FileName>
-              <FileDetail>2020년 10월 12일 00:00:10 </FileDetail>
+              <FileName>
+                음성파일 01
+                {/* {file.name} */}
+              </FileName>
+              <FileDetail>
+                2022년 10월 13일
+                {/* {file.lastModifiedDate} */}
+              </FileDetail>
             </FileInfo>
           </File>
           <DropDown>
@@ -164,9 +140,7 @@ const LeftWrapper = styled.div`
   border-right: 1px solid gray;
 `;
 
-const OpenFile = styled.div`
-  background-color: yellow;
-`;
+const OpenFile = styled.div``;
 
 const RightWrapper = styled.div`
   width: 268px;
@@ -194,7 +168,6 @@ const Control = styled.div`
 `;
 
 const Play = styled.div``;
-// const Record = styled.div``;
 const Stop = styled.div``;
 
 const List = styled.div`
@@ -203,19 +176,14 @@ const List = styled.div`
   margin: 0 10px;
 `;
 const File = styled.div`
-  margin: 0 10px;
-  margin: 5px;
-  display: flex;
-  justify-content: center;
-`;
-const FilePlay = styled.div`
   margin: 10px;
 `;
+
 const FileInfo = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0 20px;
+  padding: 0 20px 10px;
 `;
 const FileName = styled.p`
   font-size: 1rem;
