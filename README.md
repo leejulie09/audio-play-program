@@ -10,8 +10,8 @@
 
 ## 2. 팀원 역할 분할
 
-- 김영수 - 공통: 초기세팅, 다운로드 기능
-- 김민욱(PO) - 레이아웃, 오디오 녹음 기능, 병합 및 리팩토링
+- 김영수 - 초기세팅, 다운로드 기능
+- 김민욱(PO) - 레이아웃, 반응형, 오디오 녹음 기능, 병합 및 리팩토링
 - 이주리 - 음성 재생 기능, 배포
 
 ## 3. 프로젝트 구조
@@ -52,10 +52,10 @@
 - useState를 통한 상태관리로 재생시 ‘일시정지’버튼 표시, 일시정지시 ‘재생’버튼 표시
 - AudioContext의 currentTime 데이터를 받아와서 setInterval함수 활용하여 실시간 재생시간 표시
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/da779eb4-4f08-4472-bd70-6ec30ed65196/Untitled.png)
+<img width="800" alt="image" src="https://user-images.githubusercontent.com/100172541/195738371-f9abb18f-0a61-400d-9729-3ab53892054c.png">
+<img width="800" alt="image" src="https://user-images.githubusercontent.com/100172541/195738410-53771604-da18-4fb1-99d6-d2452424a55d.png">
+<img width="800" alt="image" src="https://user-images.githubusercontent.com/100172541/195738433-65691b52-2405-4cb2-a151-d6770d0b022c.png">
+<img width="800" alt="image" src="https://user-images.githubusercontent.com/100172541/195738467-06ad9618-dbce-4227-a1ef-1959dda1438d.png">
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/47af397b-095f-4bc8-b48b-c31c582ef24d/Untitled.png)
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/2b6c36d8-ca47-4972-a9ca-affac69cab99/Untitled.png)
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/27bd1877-7fa6-499c-929d-2302b34ec5da/Untitled.png)
