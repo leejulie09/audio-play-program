@@ -1,6 +1,5 @@
 import styled from "styled-components";
 import { BsFillMicFill, BsFillPauseFill, BsStopFill } from "react-icons/bs";
-import { useCallback, useState } from "react";
 
 function RecodeButton({ onClickRecodButton, recValue, onClickPauseButton }) {
   const offRecStyle = `

@@ -78,8 +78,6 @@ const PlayAudio = ({ soundFile, backToRecode }) => {
   return (
     <Container>
       <Wrapper>
-        <OpenFile></OpenFile>
-
         <TimeBox>
           <Time>{realTime}</Time>
         </TimeBox>
@@ -119,8 +117,6 @@ const Wrapper = styled.div`
   width: 30rem;
   height: 15rem;
 `;
-
-const OpenFile = styled.div``;
 
 const TimeBox = styled.p`
   display: flex;

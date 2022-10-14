@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useState } from "react";
 import styled, { keyframes } from "styled-components";
-import { BiPlayCircle } from "react-icons/bi";
 import RecodeButton from "../../Components/RecodeButton";
 import PlayAudio from "../PlayAudio/PlayAudio";
 
@@ -39,7 +38,6 @@ const RecAudio = () => {
 
     navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
       const mediaRecorder = new MediaRecorder(stream);
-      console.log(audioUrl);
 
       mediaRecorder.start();
       mediaRecorder.onstart = () => {
@@ -73,7 +71,7 @@ const RecAudio = () => {
 
   const onSubmitAudioFile = useCallback(() => {
     if (audioUrl) {
-      console.log(URL.createObjectURL(audioUrl)); // 출력된 링크에서 녹음된 오디오 확인 가능
+      console.log(URL.createObjectURL(audioUrl));
     }
     const sound = new File([audioUrl], "음성녹음", {
       lastModified: new Date().getTime(),
@@ -84,7 +82,6 @@ const RecAudio = () => {
     setTest(blobUrl);
     setSoundFile(sound);
     setOnDownload(true);
-    // console.log(blobUrl);
   }, [audioUrl]);
 
   const pauseFucntion = () => {
@@ -101,9 +98,7 @@ const RecAudio = () => {
       console.log("이어서 녹화시작");
     };
   };
-  // console.log(media);
-  // console.log(audioCtx);
-  // console.log(audioUrl);
+
   const backToRecoding = () => {
     setOnResult(false);
     setOnResultPlayer(false);
