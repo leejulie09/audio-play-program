@@ -36,6 +36,7 @@ const PlayAudio = ({ soundFile, backToRecode }) => {
         });
     };
     fileReader.readAsArrayBuffer(file);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [file]);
 
   const onPlayPause = (e) => {
