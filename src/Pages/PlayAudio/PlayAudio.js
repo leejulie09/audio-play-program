@@ -25,7 +25,7 @@ const PlayAudio = ({ soundFile, backToRecode }) => {
   useEffect(() => {
     setFile(soundFile);
   }, [soundFile]);
-
+  console.log(backToRecode);
   useEffect(() => {
     fileReader.onload = function (ev) {
       audioCtxContainer.current = new AudioContext();

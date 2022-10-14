@@ -1,6 +1,8 @@
 import React, { useCallback, useState } from "react";
-import styled, { keyframes } from "styled-components";
-import RecodeButton from "../../Components/RecodeButton";
+import styled from "styled-components";
+import AudioProgressUI from "../../Components/AudioProgressUI/AudioProgressUI";
+import RecodeButton from "../../Components/RecodeButton/RecodeButton";
+import RecoderControllerUI from "../../Components/RecoderControllerUI/RecoderControllerUI";
 import PlayAudio from "../PlayAudio/PlayAudio";
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -19,7 +21,7 @@ const RecAudio = () => {
   const [source, setSource] = useState();
   const [analyser, setAnalyser] = useState();
   const [audioUrl, setAudioUrl] = useState();
-  const [test, setTest] = useState("");
+  const [downloadURL, setDownloadURL] = useState("");
   const [onResult, setOnResult] = useState(false);
   const [onResultPlayer, setOnResultPlayer] = useState(false);
   const [onDownload, setOnDownload] = useState(false);
@@ -50,7 +52,6 @@ const RecAudio = () => {
       setOnRec(false);
     });
   };
-
   const offRecAudio = () => {
     media.ondataavailable = function (e) {
       setAudioUrl(e.data);
@@ -68,7 +69,6 @@ const RecAudio = () => {
     setOnResult(true);
     setOnResultPlayer(true);
   };
-
   const onSubmitAudioFile = useCallback(() => {
     if (audioUrl) {
       console.log(URL.createObjectURL(audioUrl));
@@ -79,11 +79,10 @@ const RecAudio = () => {
     });
 
     const blobUrl = URL.createObjectURL(sound);
-    setTest(blobUrl);
+    setDownloadURL(blobUrl);
     setSoundFile(sound);
     setOnDownload(true);
   }, [audioUrl]);
-
   const pauseFucntion = () => {
     setOnPause(false);
     media.pause();
@@ -98,7 +97,6 @@ const RecAudio = () => {
       console.log("이어서 녹화시작");
     };
   };
-
   const backToRecoding = () => {
     setOnResult(false);
     setOnResultPlayer(false);
@@ -109,155 +107,48 @@ const RecAudio = () => {
   };
   return (
     <Container>
-      <LeftSideContainer>
-        <LeftTopWrapper></LeftTopWrapper>
-        <LeftMiddleWrapper>
-          <AudioWaveUIBox>
+      <Wrapper>
+        <TopWrapper />
+        <MiddleWrapper>
+          <AudioProgressUIBox>
             {onResultPlayer ? (
               <PlayAudio soundFile={soundFile} backToRecode={backToRecode} />
             ) : (
-              <>
-                {onRec ? (
-                  <>
-                    <Emoji>🎤</Emoji>
-                    <PleaseClickMessage>
-                      Click the Red Button below!
-                    </PleaseClickMessage>
-                  </>
-                ) : (
-                  <>
-                    <PulseBox
-                      delay="0s"
-                      pause={onPause ? "running" : "paused"}
-                    />
-                    <PulseBox
-                      delay="1s"
-                      pause={onPause ? "running" : "paused"}
-                    />
-                    <PulseBox
-                      delay="2s"
-                      pause={onPause ? "running" : "paused"}
-                    />
-                    <PulseMessage>
-                      {onPause ? "Recoding Progress..." : "Paused"}
-                    </PulseMessage>
-                  </>
-                )}
-              </>
+              <AudioProgressUI onRecValue={onRec} onPauseValue={onPause} />
             )}
-          </AudioWaveUIBox>
-        </LeftMiddleWrapper>
-        <LeftBottomWrapper>
+          </AudioProgressUIBox>
+        </MiddleWrapper>
+        <BottomWrapper>
           <AudioControllerBox>
             {onResult ? (
-              onDownload ? (
-                <>
-                  <DownloadButton
-                    href={`${test}`}
-                    download={`${soundFile.name}`}
-                  >
-                    다운로드
-                  </DownloadButton>
-                  <BackToRecoding onClick={backToRecoding}>
-                    다시 녹음
-                  </BackToRecoding>
-                </>
-              ) : (
-                <CheckRecoding onClick={onSubmitAudioFile}>
-                  결과 확인
-                </CheckRecoding>
-              )
+              <RecoderControllerUI
+                downloadURL={downloadURL}
+                onDownload={onDownload}
+                soundFile={soundFile}
+                backToRecoding={backToRecoding}
+                onSubmitAudioFile={onSubmitAudioFile}
+              />
             ) : (
               <RecodeButton
                 onClickRecodButton={onRec ? onRecAudio : offRecAudio}
                 onClickPauseButton={onPause ? pauseFucntion : resumeFucntion}
                 recValue={onRec}
-              >
-                녹음
-              </RecodeButton>
+              />
             )}
           </AudioControllerBox>
-        </LeftBottomWrapper>
-      </LeftSideContainer>
+        </BottomWrapper>
+      </Wrapper>
     </Container>
   );
 };
 
-const MoveSlide = keyframes`
-    0% {
-      transform: scale(0);
-      opacity: 0.7;
-    }
-    100% {
-      transform: scale(1.5);
-      opacity: 0.0;
-    }
-  `;
-const CheckRecoding = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 6rem;
-  height: 4rem;
-  border-radius: 3rem;
-  color: #9e9e9e;
-  background-color: rgba(0, 0, 0, 0.5);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
-  transition: 0.3s all;
-  :hover {
-    cursor: pointer;
-    transform: scale(1.1);
-    color: white;
-  }
-`;
-const PulseBox = styled.div`
-  position: absolute;
-  width: 15rem;
-  height: 15rem;
-  max-width: 30rem;
-  background-color: #b8b8b8;
-  border-radius: 8rem;
-  opacity: 0;
-  animation: ${MoveSlide} 3s linear infinite;
-  animation-delay: ${(props) => props.delay};
-  animation-play-state: ${(props) => props.pause};
-`;
-const PulseMessage = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 22rem;
-  height: 5rem;
-  font-size: 2rem;
-  color: white;
-  background-color: rgba(0, 0, 0, 0.7);
-  border-radius: 2rem;
-  z-index: 1;
-`;
-const PleaseClickMessage = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: auto;
-  height: 3rem;
-  color: white;
-  font-size: 1.5rem;
-`;
-const Emoji = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: auto;
-  height: 10rem;
-  font-size: 8rem;
-`;
 const Container = styled.div`
   display: flex;
   width: 100vw;
   height: 100vh;
   background-color: #363636;
 `;
-const LeftSideContainer = styled.div`
+const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -265,14 +156,14 @@ const LeftSideContainer = styled.div`
   width: 100%;
   height: 100%;
 `;
-const LeftTopWrapper = styled.div`
+const TopWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: flex-end;
   width: 100%;
   height: 25%;
 `;
-const LeftMiddleWrapper = styled.div`
+const MiddleWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -280,7 +171,7 @@ const LeftMiddleWrapper = styled.div`
   width: 70%;
   height: 45%;
 `;
-const AudioWaveUIBox = styled.div`
+const AudioProgressUIBox = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -291,7 +182,7 @@ const AudioWaveUIBox = styled.div`
   border-radius: 5rem;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
 `;
-const LeftBottomWrapper = styled.div`
+const BottomWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -306,41 +197,4 @@ const AudioControllerBox = styled.div`
   height: 40%;
 `;
 
-const DownloadButton = styled.a`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-right: 1rem;
-  width: 6rem;
-  height: 4rem;
-  border-radius: 3rem;
-  color: #9e9e9e;
-  background-color: rgba(0, 0, 0, 0.5);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
-  transition: 0.3s all;
-  :hover {
-    cursor: pointer;
-    transform: scale(1.1);
-    color: white;
-  }
-`;
-
-const BackToRecoding = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-left: 1rem;
-  width: 6rem;
-  height: 4rem;
-  border-radius: 3rem;
-  color: #9e9e9e;
-  background-color: rgba(0, 0, 0, 0.5);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
-  transition: 0.3s all;
-  :hover {
-    cursor: pointer;
-    transform: scale(1.1);
-    color: white;
-  }
-`;
 export default RecAudio;
