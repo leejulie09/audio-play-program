@@ -10,13 +10,11 @@ const files = new File([blobs], "soundBlob", {
 
 const PlayAudio = ({ soundFile, backToRecode }) => {
   const audioCtxContainer = useRef(null);
-  const ref = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [file, setFile] = useState(files);
   const [playDuration, setPlayDuration] = useState(0);
   const fileReader = new FileReader();
 
-  //오디오 재생
   const playSound = (buffer, time) => {
     const sourceNode = audioCtxContainer.current.createBufferSource();
     sourceNode.buffer = buffer;
@@ -39,26 +37,7 @@ const PlayAudio = ({ soundFile, backToRecode }) => {
     };
     fileReader.readAsArrayBuffer(file);
   }, [file]);
-  // 파일 업로드
-  // const onFileChange = (e) => {
-  //   console.log(e.target.files);
-  //   let file = e.target.files[0];
-  //   setFile(file);
-  //   // console.log("FILE:", file);
-  //   console.log("SOUNDFILE", soundFile);
-  //   let fileReader = new FileReader();
-  //   fileReader.onload = function (ev) {
-  //     audioCtxContainer.current = new AudioContext();
-  //     audioCtxContainer.current
-  //       .decodeAudioData(ev.target.result)
-  //       .then(function (buffer) {
-  //         playSound(buffer);
-  //       });
-  //   };
-  //   fileReader.readAsArrayBuffer(file);
-  // };
 
-  //재생 일시정지 + 시간 데이터
   const onPlayPause = (e) => {
     if (!isPlaying) {
       audioCtxContainer.current.resume();
@@ -99,20 +78,10 @@ const PlayAudio = ({ soundFile, backToRecode }) => {
   return (
     <Container>
       <Wrapper>
-        <OpenFile>
-          {/* <input
-            type="file"
-            accept=".mp3,.wav"
-            ref={ref}
-            onChange={onFileChange}
-          /> */}
-        </OpenFile>
+        <OpenFile></OpenFile>
 
         <TimeBox>
-          <Time>
-            {realTime}
-            {/* {toHHMMSS(playDuration)} */}
-          </Time>
+          <Time>{realTime}</Time>
         </TimeBox>
         <PlayBox>
           <Play>
